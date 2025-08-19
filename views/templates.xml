@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="menu_products" model="website.menu">
+        <field name="name">Products</field>
+        <field name="url">/products</field>
+        <field name="parent_id" ref="website.main_menu"/>
+        <field name="sequence" type="int">20</field>
+    </record>
+
+    <template id="product_list" name="Product List">
+        <t t-call="website.layout">
+            <div class="container mt16 mb16 oe_product_list">
+                <div class="row" t-if="products">
+                    <div class="col-md-12">
+                        <div class="row">
+                            <div class="col-6">
+                                <h1>Products</h1>
+                                <p>Browse our collection of products below:</p>
+                            </div>
+                            <div class="col-6 pb-0">
+                                <button type="button" t-if="rights and rights.get('can_create')" class="btn btn-primary prod_add_toggle_btn float-end" data-bs-toggle="modal" data-bs-target="#addProductModal" title="Create New Product">
+                                    <i class="fa fa-plus"></i> Add New Product
+                                </button>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Internal Reference</th>
+                                        <th>Price</th>
+                                        <th>Description</th>
+                                        <th t-if="rights and rights.get('can_write') and rights.get('can_delete')">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-foreach="products" t-as="product">
+                                        <tr t-att-data-product-id="product.id">
+                                            <td>
+                                                <t t-set="product_href" t-value="keep(product.website_url, page=(pager['page']['num'] if pager['page']['num']&gt;1 else None))" />
+                                                <a t-att-href="product_href" class="text-decoration-none" title="View Product">
+                                                    <span class="col-name" t-esc="product.display_name" />
+                                                </a>
+                                            </td>
+                                            <td><span class="col-code" t-esc="product.default_code or 'N/A'"/></td>
+                                            <td><span class="currency" t-out="website.currency_id.symbol" t-if="website.currency_id.position=='before'" /> <span class="col-price" t-esc="product.list_price"/> <span class="currency" t-out="website.currency_id.symbol" t-if="website.currency_id.position=='after'" /></td>
+                                            <td><span class="col-description" t-esc="product.product_description or 'No description available'"/></td>
+                                            <td t-if="rights and rights.get('can_write') and rights.get('can_delete')">
+                                                <div class="d-flex justify-content-center">
+                                                    <button type="button" class="btn btn-info me-2 prod_edit_btn" title="Edit Product" t-att-data-product-id="product.id"><i class="fa fa-edit" /></button>        
+                                                    <button type="button" class="btn btn-danger me-2 prod_delete_btn" title="Delete Product" t-att-data-product-id="product.id"><i class="fa fa-trash" /></button>        
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </t>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Pager -->
+                        <div class="d-flex justify-content-center my-3">
+                            <t t-call="website.pager"/>
+                        </div>
+                    </div>
+                </div>
+                <t t-if="not products">
+                    <p>No products available.</p>
+                </t>
+                
+
+
+                <div class="modal fade" id="addProductModal" tabindex="-1" aria-labelledby="addProductModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="editProductModalLabel">Add Product</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form>
+                            <div class="mb-3">
+                                <label for="name" class="col-form-label">Name:</label>
+                                <input type="text" class="form-control" id="name" name="name" required="required" />
+                            </div>
+                            <div class="mb-3">
+                                <label for="default_code" class="col-form-label">Internal Reference:</label>
+                                <input type="text" class="form-control" id="default_code" name="default_code" />
+                            </div>
+                            <div class="mb-3">
+                                <label for="list_price" class="col-form-label">Price:</label>
+                                <input type="text" class="form-control" id="list_price" name="list_price" required="required" />
+                            </div>
+                            <div class="mb-3">
+                                <label for="description_sale" class="col-form-label">Description:</label>
+                                <textarea class="form-control o_wysiwyg_loader" id="product_description" name="product_description"></textarea>
+                            </div>
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary model-close" data-bs-dismiss="modal">Close</button>
+                            <button type="button" class="btn btn-primary prod_add_btn">Add</button>
+                        </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="modal fade" id="editProductModal" tabindex="-1" aria-labelledby="editProductModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="editProductModalLabel">Edit Product Details</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form>
+                            <div class="mb-3">
+                                <label for="name" class="col-form-label">Name:</label>
+                                <input type="text" class="form-control" id="name" name="name" />
+                            </div>
+                            <div class="mb-3">
+                                <label for="default_code" class="col-form-label">Internal Reference:</label>
+                                <input type="text" class="form-control" id="default_code" name="default_code" />
+                            </div>
+                            <div class="mb-3">
+                                <label for="list_price" class="col-form-label">Price:</label>
+                                <input type="text" class="form-control" id="list_price" name="list_price" />
+                            </div>
+                            <div class="mb-3">
+                                <label for="description_sale" class="col-form-label">Description:</label>
+                                <textarea class="form-control o_wysiwyg_loader" id="product_description" name="product_description"></textarea>
+                            </div>
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary model-close" data-bs-dismiss="modal">Close</button>
+                            <button type="button" class="btn btn-primary prod_update_btn">Update</button>
+                        </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="modal fade" id="deleteProductModal" tabindex="-1" aria-labelledby="deleteProductModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="deleteProductModalLabel">Delete Product</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                Are you sure, you want to delete this product?<br />
+                                <small class="text-danger"><strong>NOTE:</strong> This action cannot be undone.</small>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                <button type="button" class="btn btn-danger prod_del_btn">Delete</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </t>
+    </template>
+
+</odoo>
