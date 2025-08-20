@@ -14,8 +14,6 @@
     ],
     "assets": {
         "web.assets_frontend": [
-            # "product_crud_owl/static/src/css/product_app.scss",
-            # "product_crud_owl/static/src/xml/product_templates.xml",
             "product_crud_owl/static/src/js/product_crud.js"
         ]
     },
